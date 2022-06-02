@@ -1,0 +1,32 @@
+{
+  "name": "fluent-bit",
+  "version": "0.0.1",
+  "description": "fluent-bit wrapper",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "cmake-js compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluent/fluent-bit.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fluent/fluent-bit/issues"
+  },
+  "homepage": "https://github.com/fluent/fluent-bit#readme",
+  "devDependencies": {
+    "cmake-js": "^6.3.0"
+  },
+  "dependencies": {
+    "bindings": "~1.2.1",
+    "node-addon-api": "^5.0.0"
+  }
+}
