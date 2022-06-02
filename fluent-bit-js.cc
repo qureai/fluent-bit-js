@@ -72,3 +72,5 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
   exports.Set(Napi::String::New(env, "example_function"), Napi::Function::New(env, example_function_wrapped));
   return exports;
 }
+
+NODE_API_MODULE(example_function_wrapped, Init)

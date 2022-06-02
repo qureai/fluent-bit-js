@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "cmake-js compile"
+    "install": "cmake-js compile -j 8"
   },
   "repository": {
     "type": "git",

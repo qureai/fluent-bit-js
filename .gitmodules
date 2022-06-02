@@ -1,0 +1,3 @@
+[submodule "fluent-bit"]
+	path = fluent-bit
+	url = https://github.com/fluent/fluent-bit
