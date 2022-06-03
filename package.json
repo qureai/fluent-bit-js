@@ -9,7 +9,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "install": "cmake-js compile -j 8"
   },
   "repository": {
@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/fluent/fluent-bit#readme",
   "devDependencies": {
-    "cmake-js": "^6.3.0"
+    "cmake-js": "^6.3.0",
+    "jest": "^28.1.0"
   },
   "dependencies": {
     "bindings": "~1.2.1",
