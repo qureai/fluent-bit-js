@@ -1,21 +1,30 @@
 const { FluentBit } = require("./fluent_bit");
+
 const service = new FluentBit();
+const input = service.input("mem");
+service.input_set(input, "tag", "mem.local");
 
-const cpu_input = service.input("cpu");
-service.input_set(cpu_input, "tag", "my_cpu", "Interval_Sec", "5");
+const lib_input = service.input("lib");
+service.input_set(lib_input, "tag", "console");
 
-const input = service.input("lib");
-service.input_set(input, "tag", "lol");
+const filter = service.filter("modify");
+service.filter_set(
+  filter,
+  "match",
+  "mem.local",
+  "add",
+  "Service1 SOMEVALUE",
+  "Rename",
+  "Mem.used MEMUSED"
+);
 
 const output = service.output("stdout");
-service.output_set("output", "match", "*");
+service.output_set(output, "match", "*");
 
 service.start();
 
-const data = [1449505010, { key1: "some value" }];
-const d = JSON.stringify(data);
-const response = service.lib_push(input, d);
-
-setTimeout(() => {
-  console.log("blah blah");
-}, 100000);
+setInterval(() => {
+  const data = [Date.now(), { key1: "some value" }];
+  const d = JSON.stringify(data);
+  service.lib_push(lib_input, d);
+}, 1000);

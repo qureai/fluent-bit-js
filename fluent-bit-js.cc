@@ -14,8 +14,13 @@ public:
 
   Napi::Value input(const Napi::CallbackInfo &info);
   Napi::Value input_set(const Napi::CallbackInfo &info);
+
   Napi::Value output(const Napi::CallbackInfo &info);
   Napi::Value output_set(const Napi::CallbackInfo &info);
+
+  Napi::Value filter(const Napi::CallbackInfo &info);
+  Napi::Value filter_set(const Napi::CallbackInfo &info);
+
   Napi::Value start(const Napi::CallbackInfo &info);
   Napi::Value lib_push(const Napi::CallbackInfo &info);
 };
@@ -28,8 +33,13 @@ Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
                   {
                       InstanceMethod("input", &FluentBit::input),
                       InstanceMethod("input_set", &FluentBit::input_set),
+
                       InstanceMethod("output", &FluentBit::output),
                       InstanceMethod("output_set", &FluentBit::output_set),
+
+                      InstanceMethod("filter", &FluentBit::filter),
+                      InstanceMethod("filter_set", &FluentBit::filter_set),
+
                       InstanceMethod("start", &FluentBit::start),
                       InstanceMethod("lib_push", &FluentBit::lib_push),
                   });
@@ -127,6 +137,50 @@ Napi::Value FluentBit::output_set(const Napi::CallbackInfo &info)
     std::string key = info[2 * key_idx + 1].As<Napi::String>();
     std::string value = info[2 * key_idx + 2].As<Napi::String>();
     const int ret = flb_output_set(this->context, in_ffd, key.c_str(), value.c_str(), NULL);
+    if (ret < 0)
+    {
+      final_return = ret;
+    }
+  }
+  return Napi::Number::New(env, final_return);
+}
+
+Napi::Value FluentBit::filter(const Napi::CallbackInfo &info)
+{
+  Napi::Env env = info.Env();
+  if (info.Length() != 1)
+  {
+    Napi::TypeError::New(env, "Wrong number of arguments")
+        .ThrowAsJavaScriptException();
+    return Napi::Value();
+  }
+
+  std::string name = info[0].As<Napi::String>();
+  const int out_ffd = flb_filter(this->context, name.c_str(), NULL);
+  return Napi::Number::New(env, out_ffd);
+}
+
+Napi::Value FluentBit::filter_set(const Napi::CallbackInfo &info)
+{
+  char key[128];
+  char value[128];
+  // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
+  Napi::Env env = info.Env();
+  if ((info.Length() < 1) || (info.Length() % 2 == 0))
+  {
+    Napi::TypeError::New(env, "Wrong number of arguments. Should be odd")
+        .ThrowAsJavaScriptException();
+    return Napi::Value();
+  }
+
+  const int in_ffd = info[0].As<Napi::Number>().Int32Value();
+  const int num_keys = (info.Length() - 1) / 2;
+  int final_return = 0;
+  for (int key_idx = 0; key_idx < num_keys; key_idx++)
+  {
+    std::string key = info[2 * key_idx + 1].As<Napi::String>();
+    std::string value = info[2 * key_idx + 2].As<Napi::String>();
+    const int ret = flb_filter_set(this->context, in_ffd, key.c_str(), value.c_str(), NULL);
     if (ret < 0)
     {
       final_return = ret;

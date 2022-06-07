@@ -9,13 +9,7 @@ test("create context", () => {
   expect(service).not.toBeNull();
 });
 
-test("create input", () => {
-  const service = new FluentBit();
-  const input = service.input("lib");
-  expect(typeof input).toBe("number");
-});
-
-test("set input config", () => {
+test("create input config", () => {
   const service = new FluentBit();
   const input = service.input("cpu");
   expect(typeof input).toBe("number");
@@ -23,13 +17,15 @@ test("set input config", () => {
   expect(response).not.toBe(-1);
 });
 
-test("create output", () => {
+test("create filter config", () => {
   const service = new FluentBit();
-  const output = service.output("stdout");
-  expect(typeof output).toBe("number");
+  const filter = service.filter("parser");
+  expect(typeof filter).toBe("number");
+  response = service.filter_set(filter, "match", "*");
+  expect(response).not.toBe(-1);
 });
 
-test("set output config", () => {
+test("create output config", () => {
   const service = new FluentBit();
   const input = service.input("cpu");
   expect(typeof input).toBe("number");
@@ -52,4 +48,26 @@ test("log output", () => {
   const data = '[1449505010, {"key1": "some value"}]';
   const response = service.lib_push(input, data);
   expect(response).not.toBe(-1);
+});
+
+test("log mem filter", () => {
+  // https://docs.fluentbit.io/manual/v/1.8/pipeline/filters/modify#configuration-file
+  const service = new FluentBit();
+  const input = service.input("mem");
+  service.input_set(input, "tag", "mem.local");
+
+  const output = service.output("stdout");
+  service.output_set(output, "match", "*");
+
+  const filter = service.filter("modify");
+  service.filter_set(
+    filter,
+    "match",
+    "*",
+    "add",
+    "Service1 SOMEVALUE",
+    "Rename",
+    "Mem.used MEMUSED"
+  );
+  service.start();
 });
