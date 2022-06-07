@@ -1,7 +1,6 @@
 // Not using any header file. Can refactor when needed
 #include <fluent-bit.h>
 #include <napi.h>
-#include <iostream>
 
 class FluentBit : public Napi::ObjectWrap<FluentBit>
 {
@@ -16,10 +15,10 @@ public:
   Napi::Value input(const Napi::CallbackInfo &info);
   Napi::Value input_set(const Napi::CallbackInfo &info);
   Napi::Value output(const Napi::CallbackInfo &info);
+  Napi::Value output_set(const Napi::CallbackInfo &info);
   Napi::Value start(const Napi::CallbackInfo &info);
   Napi::Value lib_push(const Napi::CallbackInfo &info);
 };
-
 
 Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
 {
@@ -30,6 +29,7 @@ Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
                       InstanceMethod("input", &FluentBit::input),
                       InstanceMethod("input_set", &FluentBit::input_set),
                       InstanceMethod("output", &FluentBit::output),
+                      InstanceMethod("output_set", &FluentBit::output_set),
                       InstanceMethod("start", &FluentBit::start),
                       InstanceMethod("lib_push", &FluentBit::lib_push),
                   });
@@ -57,15 +57,8 @@ Napi::Value FluentBit::input(const Napi::CallbackInfo &info)
         .ThrowAsJavaScriptException();
     return Napi::Value();
   }
-
-  if (!info[0].IsString())
-  {
-    Napi::TypeError::New(env, "Input plugin name must be string")
-        .ThrowAsJavaScriptException();
-    return Napi::Value();
-  }
-  const char *name = info[0].As<Napi::String>().Utf8Value().c_str();
-  const int in_ffd = flb_input(this->context, name, NULL);
+  std::string name = info[0].As<Napi::String>();
+  const int in_ffd = flb_input(this->context, name.c_str(), NULL);
   return Napi::Number::New(env, in_ffd);
 }
 
@@ -81,12 +74,6 @@ Napi::Value FluentBit::input_set(const Napi::CallbackInfo &info)
         .ThrowAsJavaScriptException();
     return Napi::Value();
   }
-  if (!info[0].IsNumber())
-  {
-    Napi::TypeError::New(env, "Input plugin id must be a number")
-        .ThrowAsJavaScriptException();
-    return Napi::Value();
-  }
 
   const int in_ffd = info[0].As<Napi::Number>().Int32Value();
   const int num_keys = (info.Length() - 1) / 2;
@@ -95,10 +82,9 @@ Napi::Value FluentBit::input_set(const Napi::CallbackInfo &info)
   {
     std::string key = info[2 * key_idx + 1].As<Napi::String>();
     std::string value = info[2 * key_idx + 2].As<Napi::String>();
-    // std::cout << 2 * key_idx + 1 << " " << key.c_str() << " " << std::endl;
-    // std::cout << 2 * key_idx + 2 << " " << value.c_str() << " " << std::endl;
     const int ret = flb_input_set(this->context, in_ffd, key.c_str(), value.c_str(), NULL);
-    if (ret < 0) {
+    if (ret < 0)
+    {
       final_return = ret;
     }
   }
@@ -115,17 +101,38 @@ Napi::Value FluentBit::output(const Napi::CallbackInfo &info)
     return Napi::Value();
   }
 
-  if (!info[0].IsString())
+  std::string name = info[0].As<Napi::String>();
+  const int out_ffd = flb_output(this->context, name.c_str(), NULL);
+  return Napi::Number::New(env, out_ffd);
+}
+
+Napi::Value FluentBit::output_set(const Napi::CallbackInfo &info)
+{
+  char key[128];
+  char value[128];
+  // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
+  Napi::Env env = info.Env();
+  if ((info.Length() < 1) || (info.Length() % 2 == 0))
   {
-    Napi::TypeError::New(env, "Output plugin name must be string")
+    Napi::TypeError::New(env, "Wrong number of arguments. Should be odd")
         .ThrowAsJavaScriptException();
     return Napi::Value();
   }
 
-  const char *name = info[0].As<Napi::String>().Utf8Value().c_str();
-
-  const int out_ffd = flb_output(this->context, name, NULL);
-  return Napi::Number::New(env, out_ffd);
+  const int in_ffd = info[0].As<Napi::Number>().Int32Value();
+  const int num_keys = (info.Length() - 1) / 2;
+  int final_return = 0;
+  for (int key_idx = 0; key_idx < num_keys; key_idx++)
+  {
+    std::string key = info[2 * key_idx + 1].As<Napi::String>();
+    std::string value = info[2 * key_idx + 2].As<Napi::String>();
+    const int ret = flb_output_set(this->context, in_ffd, key.c_str(), value.c_str(), NULL);
+    if (ret < 0)
+    {
+      final_return = ret;
+    }
+  }
+  return Napi::Number::New(env, final_return);
 }
 
 Napi::Value FluentBit::start(const Napi::CallbackInfo &info)
@@ -137,8 +144,8 @@ Napi::Value FluentBit::start(const Napi::CallbackInfo &info)
         .ThrowAsJavaScriptException();
     return Napi::Value();
   }
-  flb_start(this->context);
-  return Napi::Value();
+  int ret = flb_start(this->context);
+  return Napi::Number::New(env, ret);
 }
 
 Napi::Value FluentBit::lib_push(const Napi::CallbackInfo &info)
@@ -150,28 +157,13 @@ Napi::Value FluentBit::lib_push(const Napi::CallbackInfo &info)
         .ThrowAsJavaScriptException();
     return Napi::Value();
   }
-  if (!info[0].IsNumber())
-  {
-    Napi::TypeError::New(env, "Input plugin id must be a number")
-        .ThrowAsJavaScriptException();
-    return Napi::Value();
-  }
-
-  if (!info[1].IsString())
-  {
-    Napi::TypeError::New(env, "Input data must be a string")
-        .ThrowAsJavaScriptException();
-    return Napi::Value();
-  }
 
   const int in_ffd = info[0].As<Napi::Number>().Int32Value();
   std::string data = info[1].As<Napi::String>();
 
   int result = flb_lib_push(this->context, in_ffd, data.c_str(), strlen(data.c_str()));
-
   return Napi::Number::New(env, result);
 }
-
 
 FluentBit::~FluentBit()
 {

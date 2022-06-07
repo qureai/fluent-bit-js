@@ -12,28 +12,30 @@ test("create context", () => {
 test("create input", () => {
   const service = new FluentBit();
   const input = service.input("lib");
-  expect(typeof input).toBe('number')
+  expect(typeof input).toBe("number");
 });
-
 
 test("set input config", () => {
   const service = new FluentBit();
   const input = service.input("cpu");
-  expect(typeof input).toBe('number');
-  service.input_set(input, "tag", "my_records");
+  expect(typeof input).toBe("number");
+  response = service.input_set(input, "tag", "my_records");
+  expect(response).not.toBe(-1);
 });
 
 test("create output", () => {
   const service = new FluentBit();
   const output = service.output("stdout");
-  expect(typeof output).toBe('number');
+  expect(typeof output).toBe("number");
 });
 
-// test("set output config", () => {
-//   const service = new fluentbit();
-//   const output = service.output("stdout");
-//   output.set({ tag: "my_records", ssl: false });
-// });
+test("set output config", () => {
+  const service = new FluentBit();
+  const input = service.input("cpu");
+  expect(typeof input).toBe("number");
+  response = service.input_set(input, "tag", "my_records");
+  expect(response).not.toBe(-1);
+});
 
 test("service start", () => {
   const service = new FluentBit();
