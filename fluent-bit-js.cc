@@ -105,8 +105,9 @@ Napi::Value FluentBit::lib_push(const Napi::CallbackInfo &info)
   }
 
   const int in_ffd = info[0].As<Napi::Number>().Int32Value();
-  const char *data = info[1].As<Napi::String>().Utf8Value().c_str();
-  int result = flb_lib_push(this->context, in_ffd, data, strlen(data));
+  std::string data = info[1].As<Napi::String>();
+
+  int result = flb_lib_push(this->context, in_ffd, data.c_str(), strlen(data.c_str()));
 
   return Napi::Number::New(env, result);
 }
