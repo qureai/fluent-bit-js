@@ -1,16 +1,16 @@
-const { FluentBit } = require("./fluent_bit");
+const { FluentBit: FluentBitRaw } = require("bindings")("fluent_bit_js.node");
 
 test("import successful", () => {
   true;
 });
 
 test("create context", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   expect(service).not.toBeNull();
 });
 
 test("create input config", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const input = service.input("cpu");
   expect(typeof input).toBe("number");
   response = service.input_set(input, "tag", "my_records");
@@ -18,7 +18,7 @@ test("create input config", () => {
 });
 
 test("create filter config", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const filter = service.filter("parser");
   expect(typeof filter).toBe("number");
   response = service.filter_set(filter, "match", "*");
@@ -26,7 +26,7 @@ test("create filter config", () => {
 });
 
 test("create output config", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const input = service.input("cpu");
   expect(typeof input).toBe("number");
   response = service.input_set(input, "tag", "my_records");
@@ -34,14 +34,14 @@ test("create output config", () => {
 });
 
 test("service start", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const input = service.input("cpu");
   const output = service.output("stdout");
   service.start();
 });
 
 test("log output", () => {
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const input = service.input("lib");
   const output = service.output("stdout");
   service.start();
@@ -52,7 +52,7 @@ test("log output", () => {
 
 test("log mem filter", () => {
   // https://docs.fluentbit.io/manual/v/1.8/pipeline/filters/modify#configuration-file
-  const service = new FluentBit();
+  const service = new FluentBitRaw();
   const input = service.input("mem");
   service.input_set(input, "tag", "mem.local");
 

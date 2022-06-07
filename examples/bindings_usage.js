@@ -1,4 +1,4 @@
-const { FluentBit } = require("./fluent_bit");
+const { FluentBit } = require("bindings")("fluent_bit_js.node");
 
 const service = new FluentBit();
 const input = service.input("mem");
