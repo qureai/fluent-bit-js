@@ -4,9 +4,9 @@ set (CMAKE_CXX_STANDARD 11)
 
 
 project (fluent_bit_js)
-set(FLB_SOURCE "fluent-bit")
+set(FLB_SOURCE "src/fluent-bit")
 # Include Headers
-add_subdirectory(fluent-bit)
+add_subdirectory(src/fluent-bit)
 set(FLB_PATH_ROOT_SOURCE ${FLB_SOURCE})
 include(${FLB_SOURCE}/cmake/libraries.cmake)
 include(${FLB_SOURCE}/cmake/headers.cmake)
