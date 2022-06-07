@@ -4,9 +4,11 @@ test("import successful", () => {
   true;
 });
 
-test("create context", () => {
+test("create service config", () => {
   const service = new FluentBitRaw();
   expect(service).not.toBeNull();
+  response = service.service_set("flush", "1");
+  expect(response).not.toBe(-1);
 });
 
 test("create input config", () => {

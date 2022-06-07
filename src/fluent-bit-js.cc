@@ -12,6 +12,8 @@ public:
   ~FluentBit();
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
 
+  Napi::Value service_set(const Napi::CallbackInfo &info);
+
   Napi::Value input(const Napi::CallbackInfo &info);
   Napi::Value input_set(const Napi::CallbackInfo &info);
 
@@ -31,6 +33,8 @@ Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
       DefineClass(env,
                   "FluentBit",
                   {
+                      InstanceMethod("service_set", &FluentBit::service_set),
+
                       InstanceMethod("input", &FluentBit::input),
                       InstanceMethod("input_set", &FluentBit::input_set),
 
@@ -58,6 +62,32 @@ FluentBit::FluentBit(const Napi::CallbackInfo &info) : Napi::ObjectWrap<FluentBi
   // TODO: Raise exception if null
 }
 
+Napi::Value FluentBit::service_set(const Napi::CallbackInfo &info)
+{
+  // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
+  Napi::Env env = info.Env();
+  if ((info.Length() < 1) || (info.Length() % 2 == 1))
+  {
+    Napi::TypeError::New(env, "Wrong number of arguments. Should be even")
+        .ThrowAsJavaScriptException();
+    return Napi::Value();
+  }
+
+  const int num_keys = info.Length() / 2;
+  int final_return = 0;
+  for (int key_idx = 0; key_idx < num_keys; key_idx++)
+  {
+    std::string key = info[2 * key_idx].As<Napi::String>();
+    std::string value = info[2 * key_idx + 1].As<Napi::String>();
+    const int ret = flb_service_set(this->context, key.c_str(), value.c_str(), NULL);
+    if (ret < 0)
+    {
+      final_return = ret;
+    }
+  }
+  return Napi::Number::New(env, final_return);
+}
+
 Napi::Value FluentBit::input(const Napi::CallbackInfo &info)
 {
   Napi::Env env = info.Env();
@@ -74,8 +104,6 @@ Napi::Value FluentBit::input(const Napi::CallbackInfo &info)
 
 Napi::Value FluentBit::input_set(const Napi::CallbackInfo &info)
 {
-  char key[128];
-  char value[128];
   // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
   Napi::Env env = info.Env();
   if ((info.Length() < 1) || (info.Length() % 2 == 0))
@@ -118,8 +146,6 @@ Napi::Value FluentBit::output(const Napi::CallbackInfo &info)
 
 Napi::Value FluentBit::output_set(const Napi::CallbackInfo &info)
 {
-  char key[128];
-  char value[128];
   // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
   Napi::Env env = info.Env();
   if ((info.Length() < 1) || (info.Length() % 2 == 0))
@@ -162,8 +188,6 @@ Napi::Value FluentBit::filter(const Napi::CallbackInfo &info)
 
 Napi::Value FluentBit::filter_set(const Napi::CallbackInfo &info)
 {
-  char key[128];
-  char value[128];
   // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
   Napi::Env env = info.Env();
   if ((info.Length() < 1) || (info.Length() % 2 == 0))
