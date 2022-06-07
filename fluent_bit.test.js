@@ -48,37 +48,10 @@ test("log output", () => {
   const input = service.input("lib");
   const output = service.output("stdout");
   service.start();
-  const data = "[1449505010, {\"key1\": \"some value\"}]";
-  const response = service.lib_push(input, data, data.length);
+  const data = '[1449505010, {"key1": "some value"}]';
+  const response = service.lib_push(input, data);
   expect(response).not.toBe(-1);
   setTimeout(() => {
     console.log('blah blah');
   }, 10000)
-});
-
-test("service stop", () => {
-  const service = new fluentbit();
-  service.set({ Flush: 1 });
-  const input = service.input("cpu");
-  input.set({ tag: "my_records", ssl: false });
-  const output = service.output("stdout");
-  output.set({ tag: "my_records", ssl: false });
-  service.start();
-  input.log("happy logging with fluent-bit");
-
-  service.stop();
-});
-
-test("service destroy", () => {
-  const service = new fluentbit();
-  service.set({ Flush: 1 });
-  const input = service.input("cpu");
-  input.set({ tag: "my_records", ssl: false });
-  const output = service.output("stdout");
-  output.set({ tag: "my_records", ssl: false });
-  service.start();
-  input.log("happy logging with fluent-bit");
-
-  service.stop();
-  service.destroy();
 });
