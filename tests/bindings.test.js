@@ -42,6 +42,14 @@ test("service start", () => {
   service.start();
 });
 
+test("service destroy", () => {
+  const service = new FluentBitRaw();
+  const input = service.input("cpu");
+  const output = service.output("stdout");
+  service.start();
+  service.destroy();
+});
+
 test("log output", () => {
   const service = new FluentBitRaw();
   const input = service.input("lib");

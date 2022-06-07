@@ -25,6 +25,7 @@ public:
 
   Napi::Value start(const Napi::CallbackInfo &info);
   Napi::Value lib_push(const Napi::CallbackInfo &info);
+  Napi::Value destroy(const Napi::CallbackInfo &info);
 };
 
 Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
@@ -46,6 +47,8 @@ Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
 
                       InstanceMethod("start", &FluentBit::start),
                       InstanceMethod("lib_push", &FluentBit::lib_push),
+                      InstanceMethod("destroy", &FluentBit::destroy),
+
                   });
   Napi::String name = Napi::String::New(env, "FluentBit");
   Napi::FunctionReference *constructor = new Napi::FunctionReference();
@@ -241,6 +244,13 @@ Napi::Value FluentBit::lib_push(const Napi::CallbackInfo &info)
 
   int result = flb_lib_push(this->context, in_ffd, data.c_str(), strlen(data.c_str()));
   return Napi::Number::New(env, result);
+}
+
+Napi::Value FluentBit::destroy(const Napi::CallbackInfo &info)
+{
+  flb_stop(this->context);
+  flb_destroy(this->context);
+  this->context = NULL;
 }
 
 FluentBit::~FluentBit()
