@@ -21,7 +21,7 @@ foreach(dir ${dirs})
   message(STATUS "dir='${dir}'")
 endforeach()
 
-file(GLOB SOURCE_FILES "fluent-bit-js.cc")
+file(GLOB SOURCE_FILES "src/fluent-bit-js.cc")
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 find_package (Threads)
