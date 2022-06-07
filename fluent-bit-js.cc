@@ -71,6 +71,8 @@ Napi::Value FluentBit::input(const Napi::CallbackInfo &info)
 
 Napi::Value FluentBit::input_set(const Napi::CallbackInfo &info)
 {
+  char key[128];
+  char value[128];
   // ref: https://github.com/fluent/fluent-bit/issues/1776#issuecomment-561071592
   Napi::Env env = info.Env();
   if ((info.Length() < 1) || (info.Length() % 2 == 0))
@@ -87,21 +89,20 @@ Napi::Value FluentBit::input_set(const Napi::CallbackInfo &info)
   }
 
   const int in_ffd = info[0].As<Napi::Number>().Int32Value();
-  
-  std::cout << "hi" << info << std::endl;
-
   const int num_keys = (info.Length() - 1) / 2;
-
+  int final_return = 0;
   for (int key_idx = 0; key_idx < num_keys; key_idx++)
   {
-    /* code */
-    const char *key = info[2 * key_idx + 1].As<Napi::String>().Utf8Value().c_str();
-    const char *value = info[2 * key_idx + 2].As<Napi::String>().Utf8Value().c_str();
-    std::cout << key_idx << " " << key << " " << value << std::endl;
+    std::string key = info[2 * key_idx + 1].As<Napi::String>();
+    std::string value = info[2 * key_idx + 2].As<Napi::String>();
+    // std::cout << 2 * key_idx + 1 << " " << key.c_str() << " " << std::endl;
+    // std::cout << 2 * key_idx + 2 << " " << value.c_str() << " " << std::endl;
+    const int ret = flb_input_set(this->context, in_ffd, key.c_str(), value.c_str(), NULL);
+    if (ret < 0) {
+      final_return = ret;
+    }
   }
-
-  // const int ret = flb_input_set(this->context, in_ffd, key, value, NULL);
-  return Napi::Number::New(env, in_ffd);
+  return Napi::Number::New(env, final_return);
 }
 
 Napi::Value FluentBit::output(const Napi::CallbackInfo &info)

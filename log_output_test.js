@@ -3,10 +3,11 @@ const service = new FluentBit();
 const data = [1449505010, {"key1": "some value"}];
 const d = JSON.stringify(data);
 const input = service.input("lib");
+service.input_set(input, "tag", "my_records")
 const output = service.output("stdout");
 service.start();
 const response = service.lib_push(input, d);
-service.input_set(input, 'key1', 'value1', 'key2', 'value2')
+
 
 setTimeout(() => {
   console.log('blah blah');

@@ -18,9 +18,9 @@ test("create input", () => {
 
 test("set input config", () => {
   const service = new FluentBit();
-  const input = service.input("lib");
+  const input = service.input("cpu");
   expect(typeof input).toBe('number');
-  service.input_set(input, 'key1', 'value1', 'key2', 'value2')
+  service.input_set(input, "tag", "my_records");
 });
 
 test("create output", () => {
