@@ -1,11 +1,2 @@
-module.exports = function() {
-    return {
-        input: (name) => {
-            return {};
-        },
-        output: (name) => {
-            return {};
-        }
-    }
-}
-
+const fluent_bit_js = require('bindings')('fluent_bit_js.node')
+module.exports = fluent_bit_js

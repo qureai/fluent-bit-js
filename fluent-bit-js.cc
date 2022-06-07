@@ -8,57 +8,79 @@ private:
   flb_ctx_t *context;
 
 public:
-  FluentBit(const Napi::CallbackInfo& info);
+  FluentBit(const Napi::CallbackInfo &info);
   ~FluentBit();
-  int input(char *name, void *data);
-  int output(char *name, void *data);
-  int start();
-  int stop();
-  int push(int in_ffd, void *data, size_t len);
+  static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  static Napi::Function GetClass(Napi::Env);
+
+  Napi::Value input(const Napi::CallbackInfo &info);
 };
 
-FluentBit::FluentBit(const Napi::CallbackInfo& info) : Napi::ObjectWrap<FluentBit>(info) {
+FluentBit::FluentBit(const Napi::CallbackInfo &info) : Napi::ObjectWrap<FluentBit>(info)
+{
   this->context = flb_create();
   // TODO: Raise exception if null
 }
 
-int FluentBit::input(char *name, void *data)
+Napi::Value FluentBit::input(const Napi::CallbackInfo &info)
 {
-  return flb_input(this->context, name, data);
+  Napi::Env env = info.Env();
+  if (info.Length() != 1)
+  {
+    Napi::TypeError::New(env, "Wrong number of arguments")
+        .ThrowAsJavaScriptException();
+    return Napi::Value();
+  }
+
+  if (!info[0].IsString())
+  {
+    Napi::TypeError::New(env, "Input plugin name must be string")
+        .ThrowAsJavaScriptException();
+    return Napi::Value();
+  }
+  const char *name = info[0].As<Napi::String>().Utf8Value().c_str();
+
+  flb_input(this->context, name, NULL);
+  return Napi::Value();
 }
 
-int FluentBit::output(char *name, void *data)
+Napi::Function FluentBit::GetClass(const Napi::Env env)
 {
-  return flb_output(this->context, name, (flb_lib_out_cb *)data);
+  return DefineClass(
+      env,
+      "FluentBit",
+      {
+          FluentBit::InstanceMethod("input", &FluentBit::input),
+      });
 }
 
-int FluentBit::start()
+Napi::Object FluentBit::Init(Napi::Env env, Napi::Object exports)
 {
-  return flb_start(this->context);
-}
+  Napi::Function func =
+      DefineClass(env,
+                  "FluentBit",
+                  {
+                      InstanceMethod("input", &FluentBit::input),
+                  });
+    Napi::String name = Napi::String::New(env, "FluentBit");
 
-int FluentBit::stop()
-{
-  return flb_stop(this->context);
-}
-
-int FluentBit::push(int in_ffd, void *data, size_t len)
-{
-  return flb_lib_push(this->context, in_ffd, data, len);
+  exports.Set(name, func);
+  return exports;
 }
 
 FluentBit::~FluentBit()
 {
   if (this->context != NULL)
   {
-    this->stop();
+    // this->stop();
     flb_destroy(this->context);
   }
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
-  return exports;
+  return FluentBit::Init(env, exports);
+
 }
 
 NODE_API_MODULE(fluentbit, Init)
