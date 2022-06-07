@@ -6,6 +6,8 @@ const input = service.input("lib");
 const output = service.output("stdout");
 service.start();
 const response = service.lib_push(input, d);
+service.input_set(input, 'key1', 'value1', 'key2', 'value2')
+
 setTimeout(() => {
   console.log('blah blah');
 }, 10000)
