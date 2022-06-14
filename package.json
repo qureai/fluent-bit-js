@@ -10,7 +10,8 @@
   },
   "scripts": {
     "test": "jest",
-    "install": "cmake-js compile -j 8"
+    "preinstall": "git submodule init && git submodule update",
+    "install": "git submodule cmake-js compile -j 8"
   },
   "repository": {
     "type": "git",
