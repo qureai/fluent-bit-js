@@ -1,6 +1,6 @@
 {
   "name": "fluent-bit",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "fluent-bit wrapper",
   "main": "index.js",
   "directories": {
@@ -10,7 +10,10 @@
   },
   "scripts": {
     "test": "jest",
-    "install": "cmake-js compile -j 8"
+    "install": "npx prebuild-install -r napi || npx cmake-js compile",
+    "prebuild": "npx prebuild -t 6 -r napi --all --verbose --backend cmake-js",
+    "build": "node index.js",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -32,11 +35,17 @@
   },
   "dependencies": {
     "bindings": "~1.2.1",
-    "node-addon-api": "^5.0.0"
+    "node-addon-api": "^5.0.0",
+    "prebuild-install": "^7.1.0"
   },
   "cmake-js": {
     "runtime": "electron",
     "runtimeVersion": "13.6.9",
     "arch": "x64"
+  },
+  "binary": {
+    "napi_versions": [
+      6
+    ]
   }
 }
