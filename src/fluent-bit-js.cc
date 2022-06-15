@@ -1,6 +1,7 @@
 // Not using any header file. Can refactor when needed
 #include <fluent-bit.h>
 #include <napi.h>
+#include <iostream>
 
 class FluentBit : public Napi::ObjectWrap<FluentBit>
 {
@@ -248,18 +249,23 @@ Napi::Value FluentBit::lib_push(const Napi::CallbackInfo &info)
 
 Napi::Value FluentBit::destroy(const Napi::CallbackInfo &info)
 {
+  std::cout << "Entering destroy..." << std::endl;
   flb_stop(this->context);
   flb_destroy(this->context);
   this->context = NULL;
+  std::cout << "Exiting destroy..." << std::endl;
+  return Napi::Value();
 }
 
 FluentBit::~FluentBit()
 {
+  std::cout << "Entering deconstructor..." << std::endl;
   if (this->context != NULL)
   {
     flb_stop(this->context);
     flb_destroy(this->context);
   }
+  std::cout << "Exiting deconstructor..." << std::endl;
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)

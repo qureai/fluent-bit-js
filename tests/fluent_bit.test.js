@@ -33,3 +33,56 @@ test("config", () => {
     },
   });
 });
+
+
+
+test("multiple config", () => {
+  fluent_bit.configure({
+    service: {
+      flush: 1,
+    },
+    pipeline: {
+      inputs: [
+        {
+          name: "cpu",
+          config: {
+            tag: "my_cpu",
+          },
+        },
+      ],
+      outputs: [
+        {
+          name: "stdout",
+          config: {
+            match: "*",
+          },
+        },
+      ],
+    },
+  });
+  console.log("configuring again");
+  fluent_bit.configure({
+    service: {
+      flush: 1,
+    },
+    pipeline: {
+      inputs: [
+        {
+          name: "cpu",
+          config: {
+            tag: "my_cpu",
+          },
+        },
+      ],
+      outputs: [
+        {
+          name: "stdout",
+          config: {
+            match: "*",
+          },
+        },
+      ],
+    },
+  });
+  
+});
