@@ -23,8 +23,9 @@
   },
   "homepage": "https://github.com/fluent/fluent-bit#readme",
   "devDependencies": {
-    "cmake-js": "^6.3.0",
-    "jest": "^28.1.0"
+    "cmake-js": "^6.3.2",
+    "jest": "^28.1.0",
+    "prebuild": "^11.0.3"
   },
   "engines": {
     "node": ">= 14.0.0"
@@ -35,7 +36,7 @@
   },
   "cmake-js": {
     "runtime": "electron",
-    "runtimeVersion": "19.0.4",
-    "arch": "x86_64"
+    "runtimeVersion": "13.6.9",
+    "arch": "x64"
   }
 }
